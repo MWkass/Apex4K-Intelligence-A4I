@@ -100,6 +100,13 @@ def assistir_episodio(url_video: str, titulo_anime: str, nome_episodio: str) -> 
         f"--force-media-title={titulo_janela}", # Injeta o nome na barra superior
         f"--chapters-file={arquivo_capitulos}", # Injeta as marcações na barra de tempo
         "--script-opts=ytdl_hook-ytdl_path=/usr/local/bin/yt-dlp",
+        f"--input-ipc-server={socket_ipc}", # Injeta o Socket de Telemetria
+        f"--input-conf={arquivo_input}"
+    ]
+    
+    comando_vulkan = comando_base + [
+        "--vo=gpu-next", 
+        "--gpu-api=vulkan",
         "--hwdec=auto-safe",
         "--profile=gpu-hq",
         "--deband=yes",              # [ARTEFATOS EXTREMO] Ativa a remoção de banding
@@ -109,13 +116,10 @@ def assistir_episodio(url_video: str, titulo_anime: str, nome_episodio: str) -> 
         "--deband-grain=15",         # [ARTEFATOS EXTREMO] Ruído (Dither) elevado para camuflar imperfeições restantes
         "--video-sync=display-resample",
         "--interpolation=yes",
-        "--tscale=oversample",
-        f"--input-ipc-server={socket_ipc}", # Injeta o Socket de Telemetria
-        f"--input-conf={arquivo_input}"
+        "--tscale=oversample"
     ]
     
-    comando_vulkan = comando_base + ["--vo=gpu-next", "--gpu-api=vulkan"]
-    comando_compat = comando_base + ["--vo=gpu"] # Fallback de Compatibilidade (OpenGL padrão)
+    comando_compat = comando_base + ["--vo=gpu", "--hwdec=auto", "--profile=fast"] # Fallback Máximo para PCs antigos
 
     # 5. Lógica do Governador (Roda em Thread isolada)
     evento_player = threading.Event()
@@ -192,6 +196,12 @@ def assistir_episodio(url_video: str, titulo_anime: str, nome_episodio: str) -> 
             f.write(f"\n[MPV VULKAN FALHA] Fallback para OpenGL acionado.\n{e.stderr}\n")
             
         print("\n  [!] GPU rejeitou Vulkan. Redirecionando para Modo OpenGL (Compatibilidade)...")
+        
+        # Correção Crítica: O MPV deixa o socket "preso" quando crasha.
+        if os.path.exists(socket_ipc):
+            try: os.remove(socket_ipc)
+            except: pass
+            
         time.sleep(1.5) # Dá tempo para o OS liberar os ponteiros de rede e limpar o socket IPC
         
         try:
