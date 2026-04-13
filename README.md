@@ -31,7 +31,7 @@ Para os usuários finais, a distribuição ocorre através de um script automati
 
 1. Baixe o script de instalação oficial:
 ```bash
-curl -L -O https://raw.githubusercontent.com/SEU_USUARIO/apex4k_intelligence/main/setup_a4k.sh
+curl -L -O https://github.com/MWkass/Apex4K-Intelligence-A4I/blob/main/setup_a4k.sh
 ```
 
 2. Dê permissão de execução e instale:
