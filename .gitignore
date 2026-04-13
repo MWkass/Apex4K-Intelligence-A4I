@@ -1,0 +1,28 @@
+# Variáveis de Ambiente e Cofres Locais
+.env
+config.json
+pessoal/
+sync_git.sh
+
+# Dados de Persistência e Logs
+historico.json
+debug.log
+
+# Sockets e Comunicação Inter-processos
+mpv_ipc.sock
+
+# Automação Web (Playwright)
+.browser_session/
+
+# Ambientes Virtuais Python
+a4k_virtual/
+venv/
+env/
+
+# Compilação PyInstaller e Caches Python
+build/
+dist/
+*.spec
+__pycache__/
+*.pyc
+GEMINI.md
