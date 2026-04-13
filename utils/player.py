@@ -93,15 +93,13 @@ def assistir_episodio(url_video: str, titulo_anime: str, nome_episodio: str) -> 
         if s_extreme: f.write(f'Ctrl+3 no-osd change-list glsl-shaders set "{s_extreme}"; show-text "Anime4K: Modo EXTREMO (VL)"\n')
 
     # 4. Argumentos do Motor MPV
-    comando_mpv = [
+    comando_base = [
         "mpv",
         url_video,
         "--fs", 
         f"--force-media-title={titulo_janela}", # Injeta o nome na barra superior
         f"--chapters-file={arquivo_capitulos}", # Injeta as marcações na barra de tempo
         "--script-opts=ytdl_hook-ytdl_path=/usr/local/bin/yt-dlp",
-        "--vo=gpu-next",
-        "--gpu-api=vulkan",
         "--hwdec=auto-safe",
         "--profile=gpu-hq",
         "--deband=yes",              # [ARTEFATOS EXTREMO] Ativa a remoção de banding
@@ -115,6 +113,9 @@ def assistir_episodio(url_video: str, titulo_anime: str, nome_episodio: str) -> 
         f"--input-ipc-server={socket_ipc}", # Injeta o Socket de Telemetria
         f"--input-conf={arquivo_input}"
     ]
+    
+    comando_vulkan = comando_base + ["--vo=gpu-next", "--gpu-api=vulkan"]
+    comando_compat = comando_base + ["--vo=gpu"] # Fallback de Compatibilidade (OpenGL padrão)
 
     # 5. Lógica do Governador (Roda em Thread isolada)
     evento_player = threading.Event()
@@ -180,15 +181,26 @@ def assistir_episodio(url_video: str, titulo_anime: str, nome_episodio: str) -> 
         f.write(f"\n[PLAYER] Reproduzindo: {titulo_janela} | URL: {url_video[:50]}...\n")
 
     try:
-        subprocess.run(comando_mpv, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        # TENTATIVA 1: Motor Gráfico de Alta Performance (Vulkan)
+        subprocess.run(comando_vulkan, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     except FileNotFoundError:
         print("\n[!] Erro Crítico: MPV não encontrado.")
         sys.exit(1)
     except subprocess.CalledProcessError as e:
+        # TENTATIVA 2 (FALLBACK): Motor de Compatibilidade (OpenGL)
         with open(arquivo_log, 'a', encoding='utf-8') as f:
-            f.write(f"\n[MPV CRASH]\n{e.stderr}\n")
-        print("\n[!] Falha. Detalhes no 'debug.log'.")
-        input("Pressione [ENTER] para voltar...")
+            f.write(f"\n[MPV VULKAN FALHA] Fallback para OpenGL acionado.\n{e.stderr}\n")
+            
+        print("\n  [!] GPU rejeitou Vulkan. Redirecionando para Modo OpenGL (Compatibilidade)...")
+        time.sleep(1.5) # Dá tempo para o OS liberar os ponteiros de rede e limpar o socket IPC
+        
+        try:
+            subprocess.run(comando_compat, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        except subprocess.CalledProcessError as e2:
+            with open(arquivo_log, 'a', encoding='utf-8') as f:
+                f.write(f"\n[MPV OPENGL CRASH]\n{e2.stderr}\n")
+            print("\n[!] Falha crítica dupla no player. Detalhes no 'debug.log'.")
+            input("Pressione [ENTER] para voltar...")
     finally:
         # Mata o vigia quando o vídeo for fechado
         evento_player.set()
