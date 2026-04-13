@@ -8,8 +8,9 @@ cd "$INSTALL_DIR"
 echo "--- Instalando Apex4K Intelligence (A4I) ---"
 
 # 1. Baixa o binário (Substitua o link pelo seu link do GitHub Release)
-# Exemplo: curl -L -o a4k "https://github.com/seu-user/repo-privado/releases/download/v1.0/a4k"
-curl -L -o a4k "https://github.com/MWkass/Apex4K-Intelligence-A4I/releases/download/v1.0.0/a4k"
+# Exemplo: curl -L -o a4k "https://github.com/seu-user/repo-privado/releases/latest/download/a4k"
+# Este link sempre buscará o binário da versão mais recente que você postou no GitHub
+curl -L -o a4k "https://github.com/MWkass/Apex4K-Intelligence-A4I/releases/latest/download/a4k"
 chmod +x a4k
 
 # 2. Instala dependências de runtime (Se não existirem)
