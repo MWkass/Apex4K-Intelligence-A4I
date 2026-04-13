@@ -10,7 +10,7 @@ from InquirerPy import inquirer, get_style
 from InquirerPy.base.control import Choice
 from InquirerPy.separator import Separator
 from utils.player import assistir_episodio
-from utils.storage import carregar_historico, salvar_historico, limpar_historico, gerenciar_tamanho_log, carregar_config, salvar_config
+from utils.storage import carregar_historico, salvar_historico, limpar_historico, gerenciar_tamanho_log
 from dotenv import load_dotenv
 
 load_dotenv() # Carrega as variáveis do arquivo .env automaticamente para o SO
@@ -63,44 +63,7 @@ def animar_carregamento(evento: threading.Event, mensagem: str) -> None:
     finally:
         sys.stdout.write('\r\033[K') 
 
-def verificar_autenticacao_ia():
-    """Resolve a API Key do Gemini de forma híbrida (Dev vs Produção PyInstaller)."""
-    api_key = os.environ.get("GEMINI_API_KEY", "").strip()
-    
-    # Fallback para o cofre de produção do usuário final
-    if not api_key:
-        config = carregar_config()
-        api_key = config.get("GEMINI_API_KEY", "").strip()
-        
-    # Prompt interativo na primeira execução sem chave
-    if not api_key:
-        limpar_tela()
-        print(f"\033[36m{BANNER}\033[0m")
-        print("  [ REQUISITO DE INTELIGÊNCIA ARTIFICIAL ]\n")
-        print("  O Auto-Healing precisa de uma chave gratuita do Google Gemini para reparar scrapers em tempo real.")
-        print("  Obtenha a sua chave em: https://aistudio.google.com/app/apikey\n")
-        
-        try:
-            # Mascara o input no terminal por segurança
-            api_key = inquirer.secret(
-                message=" Cole sua GEMINI_API_KEY (ou ENTER para rodar sem IA):",
-                qmark=">",
-                amark=">",
-                style=ESTILO_TUI
-            ).execute().strip()
-        except KeyboardInterrupt:
-            sair_seguro()
-            
-        if api_key:
-            salvar_config("GEMINI_API_KEY", api_key)
-            
-    # Injeção em tempo de execução para os módulos lerem via os.environ (Desacoplamento)
-    if api_key:
-        os.environ["GEMINI_API_KEY"] = api_key
-
 def main():
-    verificar_autenticacao_ia()
-
     while True: # NÍVEL 1: LOOP DA BUSCA GLOBAL
         limpar_tela()
         # Aplica uma cor ciana no banner para combinar com o tema do InquirerPy
@@ -149,7 +112,8 @@ def main():
         thread_busca.join()
 
         if not resultados:
-            print("\nNenhum resultado de anime localizado no índice.")
+            print("\n  [!] Nenhum resultado de anime localizado no índice.")
+            print("  [!] Caso o erro persista, o layout do provedor mudou. Aguarde uma atualização de correção.")
             try:
                 input("Pressione ENTER para tentar novamente...")
             except KeyboardInterrupt:
@@ -206,7 +170,8 @@ def main():
             thread_eps.join()
 
             if not episodios:
-                print("\nNenhum episódio localizado na extração de dados.")
+                print("\n  [!] Nenhum episódio localizado na extração de dados.")
+                print("  [!] O layout do site pode ter mudado. Aguarde uma atualização de correção.")
                 try:
                     input("Pressione ENTER para voltar...")
                 except KeyboardInterrupt:

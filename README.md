@@ -6,7 +6,7 @@ O **Apex4K Intelligence** é um sistema completo e autônomo baseado em terminal
 
 ## 🚀 Arquitetura e Recursos Principais
 
-- 🧠 **Self-Healing via IA (Google Gemini):** Caso a estrutura HTML dos provedores de animes mude e quebre o scraper, a IA lê o código fonte, entende o novo layout do site e propõe o reparo automaticamente.
+- 🧠 **Self-Healing via IA (Ambiente Dev):** Sistema acoplado para o desenvolvedor. Caso a estrutura HTML mude, a IA lê o código fonte, entende o novo layout e propõe o reparo para agilizar as atualizações de correção para os usuários.
 - ⚡ **Governador Dinâmico de GPU:** O sistema se comunica com o player via Sockets IPC em tempo real. Se a sua GPU começar a gargalar ou perder frames (Frame Drops), a IA rebaixa os *Shaders* para um modo mais leve instantaneamente.
 - 🎥 **Upscaling Neural (Anime4K):** Injeção nativa de shaders na engine do MPV via Vulkan, otimizando o visual para telas grandes sem a necessidade de baixar arquivos imensos.
 - 🕵️ **Extração de Vídeo via Playwright:** Ignora bloqueios de Cloudflare e rastreia rotas de rede para extrair a URL HLS/MP4 pura de forma invisível no background.

@@ -13,9 +13,17 @@ curl -L -o a4k "https://github.com/MWkass/Apex4K-Intelligence-A4I/releases/downl
 chmod +x a4k
 
 # 2. Instala dependências de runtime (Se não existirem)
+echo "Verificando dependências do sistema..."
+
 if ! command -v mpv &> /dev/null; then
     echo "Instalando MPV (Engine Gráfica)..."
     sudo apt update && sudo apt install -y mpv
+fi
+
+if [ ! -f "/usr/local/bin/yt-dlp" ]; then
+    echo "Instalando YT-DLP (Extrator de Stream)..."
+    sudo curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp
+    sudo chmod a+rx /usr/local/bin/yt-dlp
 fi
 
 # 3. Garante que o Playwright funcione (instala apenas o navegador necessário)
